@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Executive-Enablement-Konfigurator · Claude Enterprise</title>
+<style>
+  :root{
+    --accent:#991D85;
+    --accent-soft:rgba(153,29,133,0.08);
+    --accent-soft-hover:rgba(153,29,133,0.13);
+    --accent-border:rgba(153,29,133,0.45);
+    --bg:#FAFAFA;
+    --surface:#FFFFFF;
+    --border:#E4E4E4;
+    --border-strong:#D3D3D3;
+    --text:#232323;
+    --text-secondary:#5B5B5B;
+    --text-muted:#8B8B8B;
+    --radius:10px;
+    --radius-sm:6px;
+    --shadow-card: 0 1px 2px rgba(20,20,20,0.05);
+    --topbar-h:68px;
+    --sidebar-w:272px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{margin:0 0 8px 0; font-weight:700; letter-spacing:-0.01em;}
+  h1{font-size:15px; font-weight:700; letter-spacing:0.01em; text-transform:uppercase; color:var(--text-secondary);}
+  h2{font-size:23px; font-weight:700; color:var(--text);}
+  h3{font-size:16px; font-weight:600; color:var(--text);}
+  p{margin:0 0 12px 0; color:var(--text-secondary);}
+  a{color:var(--accent);}
+  button{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  /* ---------- Topbar ---------- */
+  .topbar{
+    position:fixed; top:0; left:0; right:0; height:var(--topbar-h);
+    background:var(--surface); border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:24px; padding:0 20px;
+    z-index:200;
+  }
+  .topbar .brand{font-weight:700; font-size:15px; color:var(--text); white-space:nowrap;}
+  .topbar .brand small{display:block; font-weight:400; font-size:11px; color:var(--text-muted); text-transform:none; letter-spacing:0;}
+  .metrics{
+    display:flex; gap:12px; margin-left:12px; flex:1; min-width:0; flex-wrap:wrap;
+  }
+  .metric-pill{
+    display:flex; align-items:baseline; gap:6px;
+    border:1px solid var(--accent-border); background:var(--accent-soft);
+    border-radius:999px; padding:6px 14px; white-space:nowrap;
+  }
+  .metric-pill .metric-value{font-weight:700; font-size:15px; color:var(--accent);}
+  .metric-pill .metric-label{font-size:12px; color:var(--text-secondary);}
+  .topbar-actions{display:flex; gap:10px; align-items:center;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    appearance:none; border-radius:var(--radius-sm); border:1px solid var(--border-strong);
+    padding:10px 16px; font-size:14px; font-weight:600; cursor:pointer;
+    background:var(--surface); color:var(--text); white-space:nowrap;
+    transition:background .12s ease, border-color .12s ease;
+  }
+  .btn:hover{background:#F3F3F3;}
+  .btn-primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .btn-primary:hover{background:#831572;}
+  .btn-ghost-muted{background:transparent; border-color:transparent; color:var(--text-muted); font-weight:500; font-size:13px; padding:6px 10px;}
+  .btn-ghost-muted:hover{color:var(--text-secondary); background:#F1F1F1;}
+
+  /* ---------- Layout ---------- */
+  .body-layout{display:flex; margin-top:var(--topbar-h); min-height:calc(100vh - var(--topbar-h));}
+  .sidebar{
+    position:fixed; top:var(--topbar-h); left:0; bottom:0; width:var(--sidebar-w);
+    background:var(--surface); border-right:1px solid var(--border);
+    overflow-y:auto; padding:20px 12px; display:flex; flex-direction:column;
+  }
+  .nav-list{list-style:none; margin:0; padding:0; flex:1;}
+  .nav-item{
+    display:flex; align-items:flex-start; gap:12px; width:100%; text-align:left;
+    border:1px solid transparent; background:transparent; border-radius:var(--radius-sm);
+    padding:12px 12px; margin-bottom:4px; cursor:pointer; color:var(--text);
+  }
+  .nav-item:hover{background:#F4F4F4;}
+  .nav-item.active{background:var(--accent-soft); border-color:var(--accent-border);}
+  .nav-item .num{
+    flex:0 0 auto; width:24px; height:24px; border-radius:50%; border:1px solid var(--border-strong);
+    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--text-secondary);
+  }
+  .nav-item.active .num{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .nav-item .label{font-size:14px; font-weight:600; line-height:1.3;}
+  .nav-item.active .label{color:var(--accent);}
+  .sidebar-footer{border-top:1px solid var(--border); padding-top:12px; margin-top:12px;}
+
+  .content{margin-left:var(--sidebar-w); flex:1; padding:36px 44px 140px; max-width:980px;}
+  .panel{display:none;}
+  .panel.active{display:block; animation:none;}
+  .panel-header{margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--border);}
+  .panel-header h1{margin-bottom:6px;}
+  .panel-header h2{margin-bottom:6px;}
+  .panel-intro{color:var(--text-secondary); font-size:15px; max-width:70ch;}
+
+  /* ---------- Table (Section 1) ---------- */
+  .core-table{width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+  .core-table th, .core-table td{text-align:left; padding:14px 16px; border-bottom:1px solid var(--border); vertical-align:top; font-size:15px;}
+  .core-table th{background:#F5F5F5; font-size:12px; text-transform:uppercase; letter-spacing:.03em; color:var(--text-secondary); font-weight:700;}
+  .core-table tr:last-child td{border-bottom:none;}
+  .core-table td.col-num{font-weight:700; color:var(--accent); width:34px;}
+  .core-table td.col-dur{white-space:nowrap; color:var(--text-secondary); width:80px;}
+  .core-table td.col-title{font-weight:600; width:26%;}
+
+  /* ---------- Cards / Toggles ---------- */
+  .session-block{margin-bottom:32px;}
+  .session-block h3{margin-bottom:14px;}
+  .card-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:12px;}
+  .card{
+    border:1px solid var(--border); background:var(--surface); border-radius:var(--radius);
+    padding:16px; cursor:pointer; user-select:none; box-shadow:var(--shadow-card);
+    display:flex; align-items:flex-start; gap:12px;
+  }
+  .card:hover{border-color:var(--border-strong);}
+  .card.active{border-color:var(--accent); background:var(--accent-soft);}
+  .card .checkmark{
+    flex:0 0 auto; width:20px; height:20px; border-radius:5px; border:1.5px solid var(--border-strong);
+    display:flex; align-items:center; justify-content:center; margin-top:1px; background:var(--surface);
+  }
+  .card.active .checkmark{background:var(--accent); border-color:var(--accent);}
+  .card.active .checkmark::after{content:"✓"; color:#fff; font-size:13px; font-weight:700;}
+  .card .card-text{font-size:15px; font-weight:500;}
+  .card.active .card-text{color:var(--accent);}
+  .card .card-meta{display:block; font-size:12px; color:var(--text-muted); margin-top:3px; font-weight:400;}
+
+  /* ---------- Form fields ---------- */
+  .field-group{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px 24px; margin-bottom:20px;}
+  .field{margin-bottom:20px;}
+  .field:last-child{margin-bottom:0;}
+  .field label.field-label{display:block; font-size:14px; font-weight:600; margin-bottom:8px; color:var(--text);}
+  .hint{font-size:12.5px; color:var(--text-muted); margin-top:6px;}
+  .hint-suggestion{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; color:var(--accent); background:var(--accent-soft); border:1px solid var(--accent-border); border-radius:999px; padding:2px 9px; margin-left:8px; font-weight:600; vertical-align:middle;}
+  .option-row{display:flex; gap:10px; flex-wrap:wrap;}
+  .option-btn{
+    border:1px solid var(--border-strong); background:var(--surface); border-radius:999px;
+    padding:9px 18px; font-size:14px; font-weight:600; cursor:pointer; color:var(--text-secondary);
+  }
+  .option-btn.active-choice{border-color:var(--accent); background:var(--accent); color:#fff;}
+  input[type="text"], input[type="number"], select, textarea{
+    width:100%; border:1px solid var(--border-strong); border-radius:var(--radius-sm);
+    padding:10px 12px; font-size:15px; font-family:inherit; color:var(--text); background:var(--surface);
+  }
+  textarea{resize:vertical; min-height:64px;}
+  input[type="number"]{max-width:160px;}
+  .toggle-row{display:flex; align-items:center; justify-content:space-between; gap:16px;}
+  .switch{position:relative; width:46px; height:26px; flex:0 0 auto;}
+  .switch input{opacity:0; width:0; height:0; position:absolute;}
+  .switch .track{position:absolute; inset:0; background:#D8D8D8; border-radius:999px; transition:background .15s;}
+  .switch .track::before{content:""; position:absolute; width:20px; height:20px; left:3px; top:3px; background:#fff; border-radius:50%; transition:transform .15s; box-shadow:0 1px 2px rgba(0,0,0,.2);}
+  .switch input:checked + .track{background:var(--accent);}
+  .switch input:checked + .track::before{transform:translateX(20px);}
+  .conditional-block{margin-top:14px; padding-top:14px; border-top:1px dashed var(--border);}
+  .checkbox-row{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .checkbox-row:last-child{margin-bottom:0;}
+  .checkbox-row input[type="checkbox"]{width:18px; height:18px; accent-color:var(--accent); flex:0 0 auto;}
+  .checkbox-row label{font-size:15px; font-weight:500; cursor:pointer;}
+  .measure-item{border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 16px; margin-bottom:10px;}
+  .measure-item.active-choice{border-color:var(--accent); background:var(--accent-soft);}
+  .measure-item-head{display:flex; align-items:center; gap:10px;}
+  .measure-item-head label{font-weight:600; font-size:15px; cursor:pointer;}
+  .measure-detail{margin-top:10px; padding-left:28px;}
+  .wave-row{display:grid; grid-template-columns:140px 1fr; gap:12px; align-items:center; margin-bottom:10px;}
+  .wave-row .wave-name{font-size:14px; font-weight:600; color:var(--text-secondary);}
+  .computed-box{display:flex; align-items:center; gap:10px; background:#F5F5F5; border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px;}
+  .computed-box .computed-value{font-size:20px; font-weight:700; color:var(--accent);}
+  .computed-box .computed-label{font-size:13px; color:var(--text-secondary);}
+  .fixed-note{background:#F5F5F5; border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 16px; font-size:14.5px; color:var(--text-secondary); font-style:normal;}
+  .fixed-note strong{color:var(--text);}
+
+  /* ---------- Summary (Section 8) ---------- */
+  .summary-section{margin-bottom:22px;}
+  .summary-section h3{border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:12px;}
+  .summary-list{list-style:none; margin:0; padding:0;}
+  .summary-list li{display:flex; justify-content:space-between; gap:16px; padding:7px 0; border-bottom:1px solid #F0F0F0; font-size:14.5px;}
+  .summary-list li:last-child{border-bottom:none;}
+  .summary-list .k{color:var(--text-secondary);}
+  .summary-list .v{font-weight:600; text-align:right;}
+  .summary-empty{color:var(--text-muted); font-style:italic; font-size:14px;}
+  .final-export-bar{margin-top:32px; padding:24px; background:var(--accent-soft); border:1px solid var(--accent-border); border-radius:var(--radius); display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;}
+  .final-export-bar p{margin:0; color:var(--text); font-size:14.5px; max-width:60ch;}
+
+  @media (max-width: 900px){
+    .sidebar{position:static; width:100%; border-right:none; border-bottom:1px solid var(--border); flex-direction:row; overflow-x:auto; padding:10px;}
+    .nav-list{display:flex; flex:none; gap:6px;}
+    .nav-item{flex-direction:column; align-items:center; text-align:center; min-width:96px; gap:6px;}
+    .sidebar-footer{display:none;}
+    .body-layout{flex-direction:column;}
+    .content{margin-left:0; padding:24px 18px 120px;}
+    .topbar{flex-wrap:wrap; height:auto; padding:10px 14px;}
+    .metrics{order:3; width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">Executive-Enablement-Konfigurator<small>Claude Enterprise · Workshop-Modus</small></div>
+  <div class="metrics">
+    <div class="metric-pill"><span class="metric-value" id="metric-duration">–</span><span class="metric-label">Gesamtdauer Programm</span></div>
+    <div class="metric-pill"><span class="metric-value" id="metric-execs-per-wave">–</span><span class="metric-label">Executives pro Welle</span></div>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-primary" id="btn-export-interim">Zwischenstand exportieren</button>
+  </div>
+</header>
+
+<div class="body-layout">
+  <nav class="sidebar">
+    <ul class="nav-list" id="nav-list">
+      <li><button class="nav-item active" data-section="1"><span class="num">1</span><span class="label">Core Module</span></button></li>
+      <li><button class="nav-item" data-section="2"><span class="num">2</span><span class="label">Optionale Bausteine</span></button></li>
+      <li><button class="nav-item" data-section="3"><span class="num">3</span><span class="label">Delivery-Format</span></button></li>
+      <li><button class="nav-item" data-section="4"><span class="num">4</span><span class="label">Terminierung &amp; Wellen</span></button></li>
+      <li><button class="nav-item" data-section="5"><span class="num">5</span><span class="label">Erfolgsmessung</span></button></li>
+      <li><button class="nav-item" data-section="6"><span class="num">6</span><span class="label">Kommunikative Begleitung</span></button></li>
+      <li><button class="nav-item" data-section="7"><span class="num">7</span><span class="label">Zusammenfassung &amp; Export</span></button></li>
+    </ul>
+    <div class="sidebar-footer">
+      <button class="btn btn-ghost-muted" id="btn-reset">Konfiguration zurücksetzen</button>
+    </div>
+  </nav>
+
+  <main class="content">
+
+    <!-- Section 1 -->
+    <section class="panel active" id="section-1">
+      <div class="panel-header">
+        <h1>Abschnitt 1 / 7</h1>
+        <h2>Core Module</h2>
+        <p class="panel-intro">Unsere Empfehlung für die zentralen Programmbausteine auf Basis bisheriger Projekterfahrungen. Im nächsten Schritt können diese gezielt um zusätzliche Module ergänzt werden.</p>
+      </div>
+      <table class="core-table" id="core-table">
+        <thead>
+          <tr><th>#</th><th>Dauer</th><th>Titel</th><th>Core Skill</th><th>Relevanz für Executives</th></tr>
+        </thead>
+        <tbody id="core-table-body"></tbody>
+      </table>
+    </section>
+
+    <!-- Section 2 -->
+    <section class="panel" id="section-2">
+      <div class="panel-header">
+        <h1>Abschnitt 2 / 7</h1>
+        <h2>Optionale Bausteine je Session</h2>
+        <p class="panel-intro">Anklicken zum Aktivieren/Deaktivieren. Jeder aktive Baustein rechnet pauschal 30 Minuten zur Gesamtdauer hinzu.</p>
+      </div>
+      <div id="optional-sessions"></div>
+    </section>
+
+    <!-- Section 3 -->
+    <section class="panel" id="section-3">
+      <div class="panel-header">
+        <h1>Abschnitt 3 / 7</h1>
+        <h2>Delivery-Format</h2>
+      </div>
+
+      <div class="field-group">
+        <div class="field">
+          <label class="field-label">Präsenz / Online / Hybrid<span class="hint-suggestion">Vorschlag, im Workshop anpassbar</span></label>
+          <div class="option-row" id="opt-mode" data-path="delivery.mode" data-options="praesenz:Präsenz,online:Online,hybrid:Hybrid"></div>
+        </div>
+        <div class="field">
+          <label class="field-label">Sprache</label>
+          <div class="option-row" id="opt-language" data-path="delivery.language" data-options="de:Deutsch,en:Englisch,bilingual:Zweisprachig"></div>
+        </div>
+        <div class="field">
+          <div class="toggle-row">
+            <label class="field-label" style="margin:0;">Zeitzonen-Relevanz</label>
+            <label class="switch"><input type="checkbox" data-path="delivery.tz_relevant"><span class="track"></span></label>
+          </div>
+          <div class="conditional-block" data-show-if="delivery.tz_relevant">
+            <label class="field-label">Welche Regionen?</label>
+            <input type="text" data-path="delivery.tz_regions" placeholder="z.B. EMEA, APAC, US-Ostküste …">
+          </div>
+        </div>
+        <div class="field">
+          <div class="toggle-row">
+            <label class="field-label" style="margin:0;">Q&amp;A zwischen den Modulen</label>
+            <label class="switch"><input type="checkbox" data-path="delivery.qa_between"><span class="track"></span></label>
+          </div>
+        </div>
+        <div class="field">
+          <div class="toggle-row">
+            <label class="field-label" style="margin:0;">Laufende Betreuung danach (Experten-Q&amp;A)</label>
+            <label class="switch"><input type="checkbox" data-path="delivery.ongoing_support"><span class="track"></span></label>
+          </div>
+          <div class="conditional-block" data-show-if="delivery.ongoing_support">
+            <label class="field-label">Turnus</label>
+            <select data-path="delivery.ongoing_cadence">
+              <option value="woechentlich">wöchentlich</option>
+              <option value="alle2wochen">alle 2 Wochen</option>
+              <option value="monatlich">monatlich</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4 -->
+    <section class="panel" id="section-4">
+      <div class="panel-header">
+        <h1>Abschnitt 4 / 7</h1>
+        <h2>Terminierung &amp; Wellen</h2>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label class="field-label">Anzahl Executives gesamt<span class="hint-suggestion">Vorschlag, im Workshop anpassbar</span></label>
+          <input type="number" min="1" data-path="scheduling.total_execs">
+        </div>
+        <div class="field">
+          <label class="field-label">Anzahl Wellen</label>
+          <div class="option-row" id="opt-waves" data-path="scheduling.waves" data-numeric="true" data-options="2:2,3:3,4:4"></div>
+        </div>
+        <div class="field">
+          <label class="field-label">Executives pro Welle (automatisch berechnet)</label>
+          <div class="computed-box">
+            <span class="computed-value" id="execs-per-wave-value">–</span>
+            <span class="computed-label">= Gesamtzahl ÷ Wellen, aufgerundet</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <h3 style="margin-bottom:16px;">Terminplan-Vorschlag <span class="hint-suggestion">Vorschlag, im Workshop anpassbar</span></h3>
+        <div class="field">
+          <label class="field-label">Woche 1</label>
+          <input type="text" data-path="scheduling.week1">
+        </div>
+        <div class="field">
+          <label class="field-label">Woche 2</label>
+          <input type="text" data-path="scheduling.week2">
+        </div>
+        <div class="field">
+          <label class="field-label">Zeitversatz der Wellen am selben Tag</label>
+          <div id="wave-rows"></div>
+          <p class="hint">Wellen laufen zeitversetzt am selben Tag – Zuordnung frei editierbar. Anzahl der Zeilen passt sich automatisch an die gewählte Wellenanzahl an.</p>
+        </div>
+        <div class="field">
+          <label class="field-label">Abstand zwischen den Modulblöcken (Wochen)</label>
+          <input type="text" data-path="scheduling.gap_weeks" style="max-width:200px;">
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5 -->
+    <section class="panel" id="section-5">
+      <div class="panel-header">
+        <h1>Abschnitt 5 / 7</h1>
+        <h2>Erfolgsmessung</h2>
+        <p class="panel-intro">Wie wird sichtbar, dass die Einführung erfolgreich war?</p>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <div class="toggle-row">
+            <label class="field-label" style="margin:0;">Baseline-Erhebung vor Start</label>
+            <label class="switch"><input type="checkbox" data-path="success.baseline"><span class="track"></span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Follow-up-Zeitpunkte</label>
+          <div class="checkbox-row"><input type="checkbox" id="cb-fu30" data-path="success.followup_30"><label for="cb-fu30">30 Tage</label></div>
+          <div class="checkbox-row"><input type="checkbox" id="cb-fu60" data-path="success.followup_60"><label for="cb-fu60">60 Tage</label></div>
+          <div class="checkbox-row"><input type="checkbox" id="cb-fu90" data-path="success.followup_90"><label for="cb-fu90">90 Tage</label></div>
+        </div>
+        <div class="field">
+          <label class="field-label">Erhebungsform</label>
+          <div class="option-row" id="opt-measure-form" data-path="success.form" data-options="selbsteinschaetzung:Kurze Selbsteinschätzung,nutzungsdaten:Nutzungsdaten,beides:Beides,weitere:Weitere"></div>
+          <div class="conditional-block" data-show-if="success.form=weitere">
+            <label class="field-label">Welche Erhebungsform?</label>
+            <input type="text" data-path="success.form_other" placeholder="z.B. Interviews, Manager-Feedback …">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6 -->
+    <section class="panel" id="section-6">
+      <div class="panel-header">
+        <h1>Abschnitt 6 / 7</h1>
+        <h2>Kommunikative Begleitung</h2>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <div class="toggle-row">
+            <label class="field-label" style="margin:0;">Vorbereitende E-Mail vor Programmstart</label>
+            <label class="switch"><input type="checkbox" data-path="comms.prep_email"><span class="track"></span></label>
+          </div>
+          <div class="conditional-block" data-show-if="comms.prep_email">
+            <div class="toggle-row">
+              <label class="field-label" style="margin:0; font-weight:500;">Spezifische Inhalte / Rahmenbedingungen</label>
+              <label class="switch"><input type="checkbox" data-path="comms.prep_email_adjust"><span class="track"></span></label>
+            </div>
+            <div class="conditional-block" data-show-if="comms.prep_email_adjust">
+              <label class="field-label">Notizen zur Anpassung</label>
+              <textarea data-path="comms.prep_email_notes" placeholder="Was soll an der bestehenden E-Mail geändert werden?"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Sponsorship-Absender</label>
+          <div class="option-row" id="opt-sponsor" data-path="comms.sponsor" data-options="clevel:C-Level,programowner:Programm-Owner,hr:HR"></div>
+        </div>
+      </div>
+
+      <h3 style="margin:28px 0 6px;">Optionale Begleitmaßnahmen</h3>
+      <p class="panel-intro" style="margin-bottom:16px;">Nach Programmende. Getrennt von der personalintensiven laufenden Betreuung aus Abschnitt 3 – hier: leichte, skalierbare Maßnahmen ohne wiederkehrenden Personalaufwand.</p>
+      <div class="field-group" id="followup-measures"></div>
+    </section>
+
+    <!-- Section 7 -->
+    <section class="panel" id="section-7">
+      <div class="panel-header">
+        <h1>Abschnitt 7 / 7</h1>
+        <h2>Zusammenfassung &amp; Export</h2>
+      </div>
+      <div id="summary-content"></div>
+      <div class="fixed-note" style="margin-top:8px;"><strong>Verbindlichkeit der Teilnahme:</strong> verpflichtend (angenommen)</div>
+      <div class="final-export-bar">
+        <p>Lädt eine vollständige, lesbare Zusammenfassung aller Auswahlen als JSON herunter – strukturiert nach den 7 Abschnitten, geeignet als Grundlage für die spätere Aufbereitung in einem Word-Dokument.</p>
+        <button class="btn btn-primary" id="btn-export-final">Ergebnisse exportieren</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "exec_enablement_konfigurator_v1";
+  var saveTimer = null;
+
+  var CORE_SESSIONS = [
+    {num:1, dur:"2 Std.", title:"Getting Started & Prompting That Actually Works",
+      skill:"Sichere Grundbedienung (Interface, Projects, Datenhygiene) + wirksames Prompting (Struktur, Personas, Kontext, Iteration)",
+      relevance:"Baut die Basis-Sicherheit auf, die für alles Weitere nötig ist"},
+    {num:2, dur:"2,5 Std.", title:"Schreiben, Kommunikation & Dokumentenarbeit",
+      skill:"Schnelles Schreiben (Mails, Reports, Gremienvorlagen, Übersetzung) + Recherche/Synthese über mehrere Dokumente",
+      relevance:"Erster unmittelbar erlebbarer Produktivitätsgewinn an echten Aufgaben"},
+    {num:3, dur:"2 Std.", title:"Claude im Arbeitsalltag: Office & M365",
+      skill:"Nutzung in PowerPoint/Excel/Word (Add-ins) + M365-Connector im Chat",
+      relevance:"Verankert Claude im tatsächlichen Arbeitsfluss"},
+    {num:4, dur:"1,5 Std.", title:"Leadership in the Age of AI",
+      skill:"Reflexion: wie verändert die Zusammenarbeit mit KI die Führungsrolle",
+      relevance:"Verbindet die praktische Erfahrung mit der Frage nach der eigenen Führungsrolle"}
+  ];
+  var CORE_MINUTES = 480; // 2 + 2.5 + 2 + 1.5 hours
+
+  var OPTIONAL_ITEMS = {
+    1: {title:"Session 1 – Getting Started & Prompting", items:[
+      {key:"s1_projects", label:"Anlegen & Strukturieren von Projects"},
+      {key:"s1_hygiene", label:"Datenschutz & Data Hygiene – Deep Dive"},
+      {key:"s1_custom", label:"Custom Instructions / persönliche Arbeitsweise hinterlegen"},
+      {key:"s1_promptdeep", label:"Vertiefung Prompting: mehrstufige Prompt-Strukturen"}
+    ]},
+    2: {title:"Session 2 – Schreiben & Dokumentenarbeit", items:[
+      {key:"s2_workflows", label:"Aufbau wiederverwendbarer Workflows/Vorlagen"},
+      {key:"s2_localization", label:"Vertiefung Mehrsprachigkeit/Lokalisierung"},
+      {key:"s2_hallucination", label:"Umgang mit Quellentreue & Halluzinationsrisiken"},
+      {key:"s2_research2pres", label:"Übergang Recherche → Präsentation"}
+    ]},
+    3: {title:"Session 3 – Office & M365", items:[
+      {key:"s3_excel", label:"Deep Dive Excel"},
+      {key:"s3_ppt", label:"Deep Dive PowerPoint"},
+      {key:"s3_m365", label:"Vertiefung M365-Connector (Meeting-Vorbereitung, Mail-/Kalender-Workflows)"},
+      {key:"s3_teamwork", label:"Zusammenarbeit im Team: geteilte Projects"}
+    ]},
+    4: {title:"Session 4 – Leadership in the Age of AI", items:[
+      {key:"s4_euaiact", label:"Deep Dive EU AI Act"},
+      {key:"s4_compliance", label:"Datenschutz & Compliance aus Führungsperspektive"},
+      {key:"s4_change", label:"Change Management: KI-Adoption im eigenen Team"},
+      {key:"s4_roadmap", label:"Erstellung eines persönlichen KI-Fahrplans fürs Team"}
+    ]}
+  };
+
+  var FOLLOWUP_MEASURES = [
+    {key:"newsletter", label:"Newsletter (Feature-Updates & Best Practices)", hasCadence:true},
+    {key:"knowledge_hub", label:"Knowledge Hub (weiterführende Infos, Anleitungen, FAQ)"},
+    {key:"email_between", label:"Begleitende E-Mails zwischen den Sessions"},
+    {key:"micro_challenges", label:"Kleine Aufgaben / Micro-Challenges zwischen den Terminen"},
+    {key:"peer_exchange", label:"Peer-Austausch-Format je Welle (z.B. eigene Chat-Gruppe)"},
+    {key:"usage_reminders", label:"Nutzungs-Reminder/Nudges bei längerer Inaktivität"}
+  ];
+
+  var LABELS = {
+    mode: {praesenz:"Präsenz", online:"Online", hybrid:"Hybrid"},
+    language: {de:"Deutsch", en:"Englisch", bilingual:"Zweisprachig"},
+    cadence: {woechentlich:"wöchentlich", alle2wochen:"alle 2 Wochen", monatlich:"monatlich"},
+    form: {selbsteinschaetzung:"Kurze Selbsteinschätzung", nutzungsdaten:"Nutzungsdaten", beides:"Beides", weitere:"Weitere"},
+    sponsor: {clevel:"C-Level", programowner:"Programm-Owner", hr:"HR"},
+    newsletter_cadence: {monatlich:"monatlich", alle2wochen:"alle 2 Wochen"}
+  };
+
+  function defaultState(){
+    return {
+      optional: {
+        s1_projects:false, s1_hygiene:false, s1_custom:false, s1_promptdeep:false,
+        s2_workflows:false, s2_localization:false, s2_hallucination:false, s2_research2pres:false,
+        s3_excel:false, s3_ppt:false, s3_m365:false, s3_teamwork:false,
+        s4_euaiact:false, s4_compliance:false, s4_change:false, s4_roadmap:false
+      },
+      delivery: {
+        mode:"hybrid", language:"de", tz_relevant:false, tz_regions:"",
+        qa_between:true, ongoing_support:false, ongoing_cadence:"monatlich"
+      },
+      scheduling: {
+        total_execs:100, waves:3,
+        week1:"Dienstag & Donnerstag, virtuell",
+        week2:"Dienstag & Donnerstag, in Präsenz",
+        wave_slots:["vormittags","mittags","nachmittags"],
+        gap_weeks:"1–2"
+      },
+      success: { baseline:true, followup_30:true, followup_60:true, followup_90:true, form:"beides", form_other:"" },
+      comms: { prep_email:true, prep_email_adjust:false, prep_email_notes:"", sponsor:"clevel" },
+      followup_measures: {
+        newsletter:false, newsletter_cadence:"monatlich",
+        knowledge_hub:false, email_between:false, micro_challenges:false,
+        peer_exchange:false, usage_reminders:false
+      }
+    };
+  }
+
+  function mergeDefaults(defaults, saved){
+    var out = JSON.parse(JSON.stringify(defaults));
+    if(!saved) return out;
+    Object.keys(out).forEach(function(section){
+      if(saved[section] && typeof saved[section] === "object"){
+        Object.assign(out[section], saved[section]);
+      }
+    });
+    return out;
+  }
+
+  var state;
+  try{
+    var raw = localStorage.getItem(STORAGE_KEY);
+    state = mergeDefaults(defaultState(), raw ? JSON.parse(raw) : null);
+  }catch(e){
+    state = defaultState();
+  }
+
+  function getPath(obj, path){
+    return path.split(".").reduce(function(o,p){ return (o === undefined || o === null) ? undefined : o[p]; }, obj);
+  }
+  function setPath(obj, path, value){
+    var parts = path.split(".");
+    var cur = obj;
+    for(var i=0;i<parts.length-1;i++){ cur = cur[parts[i]]; }
+    cur[parts[parts.length-1]] = value;
+  }
+
+  function scheduleSave(){
+    if(saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){ /* storage unavailable */ }
+    }, 300);
+  }
+
+  function pad(n){ return n < 10 ? "0"+n : ""+n; }
+  function timestamp(){
+    var d = new Date();
+    return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"-"+pad(d.getHours())+pad(d.getMinutes());
+  }
+
+  function getTotalMinutes(){
+    var count = 0;
+    Object.keys(state.optional).forEach(function(k){ if(state.optional[k]) count++; });
+    return CORE_MINUTES + count*30;
+  }
+  function formatHours(minutes){
+    var hours = minutes/60;
+    var rounded = Math.round(hours*10)/10;
+    var isInt = Math.abs(rounded - Math.round(rounded)) < 0.001;
+    var str = isInt ? String(Math.round(rounded)) : rounded.toFixed(1).replace(".", ",");
+    return str + " Std.";
+  }
+  function execsPerWave(){
+    var total = Number(state.scheduling.total_execs) || 0;
+    var waves = Number(state.scheduling.waves) || 1;
+    return Math.ceil(total/waves);
+  }
+
+  function updateMetrics(){
+    document.getElementById("metric-duration").textContent = formatHours(getTotalMinutes());
+    document.getElementById("metric-execs-per-wave").textContent = String(execsPerWave());
+    var el = document.getElementById("execs-per-wave-value");
+    if(el) el.textContent = String(execsPerWave());
+  }
+
+  /* ---------- Static render: core table ---------- */
+  function renderCoreTable(){
+    var tbody = document.getElementById("core-table-body");
+    tbody.innerHTML = CORE_SESSIONS.map(function(s){
+      return "<tr>"+
+        '<td class="col-num">'+s.num+"</td>"+
+        '<td class="col-dur">'+s.dur+"</td>"+
+        '<td class="col-title">'+escapeHtml(s.title)+"</td>"+
+        "<td>"+escapeHtml(s.skill)+"</td>"+
+        "<td>"+escapeHtml(s.relevance)+"</td>"+
+      "</tr>";
+    }).join("");
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  /* ---------- Optional bausteine (Section 2) ---------- */
+  function renderOptionalSessions(){
+    var container = document.getElementById("optional-sessions");
+    var html = "";
+    [1,2,3,4].forEach(function(sessionNum){
+      var group = OPTIONAL_ITEMS[sessionNum];
+      html += '<div class="session-block"><h3>'+escapeHtml(group.title)+"</h3>";
+      html += '<div class="card-grid">';
+      group.items.forEach(function(item){
+        html += '<div class="card" data-optional-key="'+item.key+'">'+
+                  '<span class="checkmark"></span>'+
+                  '<span class="card-text">'+escapeHtml(item.label)+'<span class="card-meta">+30 Min.</span></span>'+
+                '</div>';
+      });
+      html += "</div></div>";
+    });
+    container.innerHTML = html;
+
+    container.querySelectorAll(".card").forEach(function(card){
+      card.addEventListener("click", function(){
+        var key = card.dataset.optionalKey;
+        state.optional[key] = !state.optional[key];
+        card.classList.toggle("active", state.optional[key]);
+        updateMetrics();
+        renderSummary();
+        scheduleSave();
+      });
+    });
+  }
+  function syncOptionalCards(){
+    document.querySelectorAll(".card[data-optional-key]").forEach(function(card){
+      var key = card.dataset.optionalKey;
+      card.classList.toggle("active", !!state.optional[key]);
+    });
+  }
+
+  /* ---------- Generic option-row (pill choice) renderer ---------- */
+  function renderOptionRows(){
+    document.querySelectorAll(".option-row[data-options]").forEach(function(row){
+      var path = row.dataset.path;
+      var numeric = row.dataset.numeric === "true";
+      var pairs = row.dataset.options.split(",").map(function(p){
+        var idx = p.indexOf(":");
+        return {value:p.substring(0,idx), label:p.substring(idx+1)};
+      });
+      row.innerHTML = pairs.map(function(p){
+        return '<button type="button" class="option-btn" data-value="'+p.value+'">'+escapeHtml(p.label)+"</button>";
+      }).join("");
+      row.querySelectorAll(".option-btn").forEach(function(btn){
+        btn.addEventListener("click", function(){
+          var v = numeric ? Number(btn.dataset.value) : btn.dataset.value;
+          setPath(state, path, v);
+          syncOptionRow(row);
+          updateConditionals();
+          updateMetrics();
+          if(path === "scheduling.waves") renderWaveRows();
+          renderSummary();
+          scheduleSave();
+        });
+      });
+    });
+  }
+  function syncOptionRow(row){
+    var path = row.dataset.path;
+    var current = getPath(state, path);
+    row.querySelectorAll(".option-btn").forEach(function(btn){
+      btn.classList.toggle("active-choice", String(current) === String(btn.dataset.value));
+    });
+  }
+  function syncAllOptionRows(){
+    document.querySelectorAll(".option-row[data-options]").forEach(syncOptionRow);
+  }
+
+  /* ---------- Wave rows (Section 4) ---------- */
+  var DEFAULT_SLOTS = {
+    2:["vormittags","nachmittags"],
+    3:["vormittags","mittags","nachmittags"],
+    4:["vormittags","mittags","nachmittags","spätnachmittags"]
+  };
+  function renderWaveRows(){
+    var waves = Number(state.scheduling.waves) || 3;
+    var slots = state.scheduling.wave_slots || [];
+    var defaults = DEFAULT_SLOTS[waves] || DEFAULT_SLOTS[3];
+    var newSlots = [];
+    for(var i=0;i<waves;i++){
+      newSlots.push(slots[i] !== undefined ? slots[i] : defaults[i]);
+    }
+    state.scheduling.wave_slots = newSlots;
+
+    var container = document.getElementById("wave-rows");
+    container.innerHTML = newSlots.map(function(val, i){
+      return '<div class="wave-row"><span class="wave-name">Welle '+(i+1)+'</span>'+
+        '<input type="text" data-wave-index="'+i+'" value="'+escapeHtml(val)+'"></div>';
+    }).join("");
+    container.querySelectorAll("input[data-wave-index]").forEach(function(input){
+      input.addEventListener("input", function(){
+        var idx = Number(input.dataset.waveIndex);
+        state.scheduling.wave_slots[idx] = input.value;
+        renderSummary();
+        scheduleSave();
+      });
+    });
+  }
+
+  /* ---------- Follow-up measures (Section 7) ---------- */
+  function renderFollowupMeasures(){
+    var container = document.getElementById("followup-measures");
+    container.innerHTML = FOLLOWUP_MEASURES.map(function(m){
+      var detail = "";
+      if(m.hasCadence){
+        detail = '<div class="measure-detail" data-show-if="followup_measures.'+m.key+'">'+
+          '<label class="field-label">Turnus</label>'+
+          '<select data-path="followup_measures.'+m.key+'_cadence" style="max-width:220px;">'+
+            '<option value="monatlich">monatlich</option>'+
+            '<option value="alle2wochen">alle 2 Wochen</option>'+
+          '</select></div>';
+      }
+      return '<div class="measure-item" data-measure="'+m.key+'">'+
+        '<div class="measure-item-head">'+
+          '<input type="checkbox" id="fm-'+m.key+'" data-path="followup_measures.'+m.key+'">'+
+          '<label for="fm-'+m.key+'">'+escapeHtml(m.label)+'</label>'+
+        '</div>'+detail+
+      '</div>';
+    }).join("");
+  }
+
+  /* ---------- Generic data-path binding ---------- */
+  function bindAllInputs(){
+    document.querySelectorAll("[data-path]").forEach(function(el){
+      if(el.tagName === "DIV") return; // option-rows handled separately
+      el.addEventListener("input", onFieldChange);
+      el.addEventListener("change", onFieldChange);
+    });
+  }
+  function onFieldChange(e){
+    var el = e.target;
+    var path = el.dataset.path;
+    if(!path) return;
+    var value;
+    if(el.type === "checkbox"){ value = el.checked; }
+    else if(el.type === "number"){ value = el.value === "" ? "" : Number(el.value); }
+    else { value = el.value; }
+    setPath(state, path, value);
+    updateConditionals();
+    syncMeasureHighlight();
+    updateMetrics();
+    renderSummary();
+    scheduleSave();
+  }
+  function syncInputsFromState(){
+    document.querySelectorAll("[data-path]").forEach(function(el){
+      if(el.tagName === "DIV") return;
+      var path = el.dataset.path;
+      var val = getPath(state, path);
+      if(el.type === "checkbox"){ el.checked = !!val; }
+      else { el.value = (val === undefined || val === null) ? "" : val; }
+    });
+  }
+
+  /* ---------- Conditional visibility ---------- */
+  function updateConditionals(){
+    document.querySelectorAll("[data-show-if]").forEach(function(el){
+      var expr = el.dataset.showIf;
+      var show;
+      if(expr.indexOf("=") !== -1){
+        var parts = expr.split("=");
+        var val = getPath(state, parts[0]);
+        show = String(val) === parts[1];
+      } else {
+        show = !!getPath(state, expr);
+      }
+      el.style.display = show ? "" : "none";
+    });
+  }
+
+  /* ---------- Measure item highlight (Section 7) ---------- */
+  function syncMeasureHighlight(){
+    document.querySelectorAll(".measure-item[data-measure]").forEach(function(item){
+      var key = item.dataset.measure;
+      item.classList.toggle("active-choice", !!state.followup_measures[key]);
+    });
+  }
+
+  /* ---------- Navigation ---------- */
+  function bindNav(){
+    document.querySelectorAll(".nav-item").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var target = btn.dataset.section;
+        document.querySelectorAll(".panel").forEach(function(p){ p.classList.remove("active"); });
+        document.getElementById("section-"+target).classList.add("active");
+        document.querySelectorAll(".nav-item").forEach(function(n){ n.classList.remove("active"); });
+        btn.classList.add("active");
+        document.querySelector(".content").scrollTop = 0;
+        window.scrollTo(0,0);
+        if(target === "7") renderSummary();
+      });
+    });
+  }
+
+  /* ---------- Summary (Section 8) ---------- */
+  function renderSummary(){
+    var el = document.getElementById("summary-content");
+    if(!el) return;
+
+    var coreRows = CORE_SESSIONS.map(function(s){ return [s.dur+" – "+s.title, "fix"]; });
+
+    var optionalHtml = [1,2,3,4].map(function(n){
+      var group = OPTIONAL_ITEMS[n];
+      var active = group.items.filter(function(it){ return state.optional[it.key]; });
+      var body = active.length
+        ? '<ul class="summary-list">'+active.map(function(it){ return '<li><span class="k">'+escapeHtml(it.label)+'</span><span class="v">aktiv · +30 Min.</span></li>'; }).join("")+"</ul>"
+        : '<p class="summary-empty">Keine optionalen Bausteine ausgewählt.</p>';
+      return '<div class="summary-section"><h3>'+escapeHtml(group.title)+"</h3>"+body+"</div>";
+    }).join("");
+
+    var d = state.delivery;
+    var deliveryHtml = summaryList([
+      ["Format", LABELS.mode[d.mode] || d.mode],
+      ["Sprache", LABELS.language[d.language] || d.language],
+      ["Zeitzonen-Relevanz", d.tz_relevant ? ("Ja – "+(d.tz_regions || "(keine Regionen angegeben)")) : "Nein"],
+      ["Q&A zwischen den Modulen", d.qa_between ? "Ja" : "Nein"],
+      ["Laufende Betreuung danach", d.ongoing_support ? ("Ja – Turnus: "+(LABELS.cadence[d.ongoing_cadence]||d.ongoing_cadence)) : "Nein"]
+    ]);
+
+    var sch = state.scheduling;
+    var waveRowsText = (sch.wave_slots||[]).map(function(v,i){ return "Welle "+(i+1)+": "+v; }).join(" · ");
+    var schedulingHtml = summaryList([
+      ["Anzahl Executives gesamt", String(sch.total_execs)],
+      ["Anzahl Wellen", String(sch.waves)],
+      ["Executives pro Welle", String(execsPerWave())],
+      ["Woche 1", sch.week1],
+      ["Woche 2", sch.week2],
+      ["Zeitversatz der Wellen", waveRowsText],
+      ["Abstand zwischen Modulblöcken", sch.gap_weeks+" Wochen"]
+    ]);
+
+    var suc = state.success;
+    var followups = [];
+    if(suc.followup_30) followups.push("30 Tage");
+    if(suc.followup_60) followups.push("60 Tage");
+    if(suc.followup_90) followups.push("90 Tage");
+    var successHtml = summaryList([
+      ["Baseline-Erhebung vor Start", suc.baseline ? "Ja" : "Nein"],
+      ["Follow-up-Zeitpunkte", followups.length ? followups.join(", ") : "keine ausgewählt"],
+      ["Erhebungsform", suc.form === "weitere" ? ("Weitere – "+(suc.form_other || "(nicht angegeben)")) : (LABELS.form[suc.form] || suc.form)]
+    ]);
+
+    var com = state.comms;
+    var commsHtml = summaryList([
+      ["Vorbereitende E-Mail vor Programmstart", com.prep_email ? "Ja" : "Nein"],
+      ["Spezifische Inhalte / Rahmenbedingungen", com.prep_email && com.prep_email_adjust ? ("Ja – "+(com.prep_email_notes || "(keine Notizen)")) : "Nein"],
+      ["Sponsorship-Absender", LABELS.sponsor[com.sponsor] || com.sponsor]
+    ]);
+
+    var fm = state.followup_measures;
+    var fmActive = FOLLOWUP_MEASURES.filter(function(m){ return fm[m.key]; });
+    var fmHtml = fmActive.length
+      ? '<ul class="summary-list">'+fmActive.map(function(m){
+          var extra = (m.hasCadence) ? (" · Turnus: "+(LABELS.newsletter_cadence[fm[m.key+"_cadence"]] || fm[m.key+"_cadence"])) : "";
+          return '<li><span class="k">'+escapeHtml(m.label)+'</span><span class="v">aktiv'+extra+'</span></li>';
+        }).join("")+"</ul>"
+      : '<p class="summary-empty">Keine Begleitmaßnahmen ausgewählt.</p>';
+
+    el.innerHTML =
+      '<div class="summary-section"><h3>1 · Core Module</h3>'+summaryList(coreRows)+'</div>'+
+      '<div class="summary-section"><h3>2 · Optionale Bausteine</h3>'+optionalHtml+'</div>'+
+      '<div class="summary-section"><h3>3 · Delivery-Format</h3>'+deliveryHtml+'</div>'+
+      '<div class="summary-section"><h3>4 · Terminierung &amp; Wellen</h3>'+schedulingHtml+'</div>'+
+      '<div class="summary-section"><h3>5 · Erfolgsmessung</h3>'+successHtml+'</div>'+
+      '<div class="summary-section"><h3>6 · Kommunikative Begleitung</h3>'+commsHtml+'</div>'+
+      '<div class="summary-section"><h3>6 · Optionale Begleitmaßnahmen</h3>'+fmHtml+'</div>'+
+      '<div class="summary-section"><h3>Gesamtdauer Programm</h3>'+
+        '<div class="computed-box"><span class="computed-value">'+formatHours(getTotalMinutes())+'</span><span class="computed-label">Core Module + aktive optionale Bausteine</span></div>'+
+      '</div>';
+  }
+  function summaryList(pairs){
+    return '<ul class="summary-list">'+pairs.map(function(p){
+      return '<li><span class="k">'+escapeHtml(p[0])+'</span><span class="v">'+escapeHtml(p[1])+'</span></li>';
+    }).join("")+"</ul>";
+  }
+
+  /* ---------- Export ---------- */
+  function buildExportObject(){
+    var activeOptional = {};
+    [1,2,3,4].forEach(function(n){
+      activeOptional["Session_"+n] = OPTIONAL_ITEMS[n].items.map(function(it){
+        return { label: it.label, aktiv: !!state.optional[it.key] };
+      });
+    });
+
+    var d = state.delivery;
+    var sch = state.scheduling;
+    var suc = state.success;
+    var com = state.comms;
+    var fm = state.followup_measures;
+
+    return {
+      "1_Core_Module": CORE_SESSIONS.map(function(s){
+        return { nummer:s.num, dauer:s.dur, titel:s.title, core_skill:s.skill, relevanz:s.relevance };
+      }),
+      "2_Optionale_Bausteine": activeOptional,
+      "3_Delivery_Format": {
+        format: LABELS.mode[d.mode] || d.mode,
+        sprache: LABELS.language[d.language] || d.language,
+        zeitzonen_relevanz: d.tz_relevant,
+        zeitzonen_regionen: d.tz_relevant ? d.tz_regions : null,
+        qa_zwischen_modulen: d.qa_between,
+        laufende_betreuung: d.ongoing_support,
+        laufende_betreuung_turnus: d.ongoing_support ? (LABELS.cadence[d.ongoing_cadence] || d.ongoing_cadence) : null
+      },
+      "4_Terminierung_Wellen": {
+        executives_gesamt: sch.total_execs,
+        anzahl_wellen: sch.waves,
+        executives_pro_welle: execsPerWave(),
+        woche_1: sch.week1,
+        woche_2: sch.week2,
+        zeitversatz_wellen: (sch.wave_slots||[]).map(function(v,i){ return { welle:i+1, zeitfenster:v }; }),
+        abstand_modulbloecke_wochen: sch.gap_weeks
+      },
+      "5_Erfolgsmessung": {
+        baseline_erhebung: suc.baseline,
+        followup_zeitpunkte: [
+          suc.followup_30 ? "30 Tage" : null,
+          suc.followup_60 ? "60 Tage" : null,
+          suc.followup_90 ? "90 Tage" : null
+        ].filter(Boolean),
+        erhebungsform: suc.form === "weitere" ? "Weitere" : (LABELS.form[suc.form] || suc.form),
+        erhebungsform_weitere_details: suc.form === "weitere" ? suc.form_other : null
+      },
+      "6_Kommunikative_Begleitung_und_Begleitmassnahmen": {
+        vorbereitende_email: com.prep_email,
+        spezifische_inhalte_rahmenbedingungen: com.prep_email && com.prep_email_adjust,
+        spezifische_inhalte_notizen: (com.prep_email && com.prep_email_adjust) ? com.prep_email_notes : null,
+        sponsorship_absender: LABELS.sponsor[com.sponsor] || com.sponsor,
+        optionale_begleitmassnahmen: FOLLOWUP_MEASURES.map(function(m){
+          var out = { massnahme: m.label, aktiv: !!fm[m.key] };
+          if(m.hasCadence) out.turnus = fm[m.key] ? (LABELS.newsletter_cadence[fm[m.key+"_cadence"]] || fm[m.key+"_cadence"]) : null;
+          return out;
+        })
+      },
+      "Gesamtdauer_Programm": formatHours(getTotalMinutes()),
+      "Verbindlichkeit_der_Teilnahme": "verpflichtend (angenommen)",
+      "Exportiert_am": new Date().toISOString()
+    };
+  }
+  function downloadJSON(obj, filenamePrefix){
+    var blob = new Blob([JSON.stringify(obj, null, 2)], {type:"application/json"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = filenamePrefix+"-"+timestamp()+".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+
+  /* ---------- Reset ---------- */
+  function bindReset(){
+    document.getElementById("btn-reset").addEventListener("click", function(){
+      var ok = confirm("Konfiguration wirklich zurücksetzen? Alle Eingaben in diesem Browser gehen unwiderruflich verloren.");
+      if(ok){
+        try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+        location.reload();
+      }
+    });
+  }
+
+  /* ---------- Init ---------- */
+  function init(){
+    renderCoreTable();
+    renderOptionalSessions();
+    renderOptionRows();
+    renderWaveRows();
+    renderFollowupMeasures();
+
+    bindAllInputs();
+    bindNav();
+    bindReset();
+
+    syncInputsFromState();
+    syncAllOptionRows();
+    syncOptionalCards();
+    updateConditionals();
+    syncMeasureHighlight();
+    updateMetrics();
+    renderSummary();
+
+    document.getElementById("btn-export-interim").addEventListener("click", function(){
+      downloadJSON(buildExportObject(), "konfigurator-zwischenstand");
+    });
+    document.getElementById("btn-export-final").addEventListener("click", function(){
+      downloadJSON(buildExportObject(), "konfigurator-ergebnisse");
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+</body>
+</html>
