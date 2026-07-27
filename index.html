@@ -194,6 +194,24 @@
   .final-export-bar{margin-top:32px; padding:24px; background:var(--accent-soft); border:1px solid var(--accent-border); border-radius:var(--radius); display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;}
   .final-export-bar p{margin:0; color:var(--text); font-size:14.5px; max-width:60ch;}
 
+  /* ---------- Password gate ---------- */
+  #app-shell{display:none;}
+  body.unlocked #app-shell{display:block;}
+  body.unlocked #password-gate{display:none;}
+  #password-gate{
+    position:fixed; inset:0; z-index:1000; background:var(--bg);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .gate-box{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:36px 32px; width:100%; max-width:360px; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.06);
+  }
+  .gate-box h2{font-size:20px; margin-bottom:8px;}
+  .gate-box p{font-size:14px; margin-bottom:18px;}
+  .gate-box input{text-align:center; font-size:16px;}
+  .gate-error{display:none; color:#B3261E; font-size:13px; margin:10px 0 0;}
+  .gate-error.show{display:block;}
+
   @media (max-width: 900px){
     .sidebar{position:static; width:100%; border-right:none; border-bottom:1px solid var(--border); flex-direction:row; overflow-x:auto; padding:10px;}
     .nav-list{display:flex; flex:none; gap:6px;}
@@ -208,6 +226,17 @@
 </head>
 <body>
 
+<div id="password-gate">
+  <div class="gate-box">
+    <h2>Zugang zum Konfigurator</h2>
+    <p>Bitte Passwort eingeben, um fortzufahren.</p>
+    <input type="password" id="gate-input" placeholder="Passwort" autocomplete="off">
+    <button class="btn btn-primary" id="gate-submit" style="width:100%; margin-top:10px;">Zugang freischalten</button>
+    <p class="gate-error" id="gate-error">Falsches Passwort. Bitte erneut versuchen.</p>
+  </div>
+</div>
+
+<div id="app-shell">
 <header class="topbar">
   <div class="brand">Executive-Enablement-Konfigurator<small>Claude Enterprise · Workshop-Modus</small></div>
   <div class="metrics">
@@ -438,8 +467,51 @@
 
   </main>
 </div>
+</div>
 
 <script>
+/* =======================================================================
+   PASSWORT-SPERRE — bitte vor Veröffentlichung anpassen!
+   Dies ist KEINE echte Zugriffskontrolle (Client-seitig, Code ist im
+   Quelltext einsehbar), sondern nur eine einfache Hürde gegen zufälligen
+   Zugriff/Suchmaschinen. Passwort unten in Anführungszeichen ändern.
+   ======================================================================= */
+(function(){
+  "use strict";
+  var GATE_PASSWORD = "workshop2026"; // <-- HIER EIGENES PASSWORT EINTRAGEN
+  var GATE_SESSION_KEY = "konfigurator_gate_unlocked";
+
+  function unlock(){
+    document.body.classList.add("unlocked");
+    try{ sessionStorage.setItem(GATE_SESSION_KEY, "1"); }catch(e){}
+  }
+  function tryUnlock(){
+    var input = document.getElementById("gate-input");
+    var error = document.getElementById("gate-error");
+    if(input.value === GATE_PASSWORD){
+      unlock();
+    } else {
+      error.classList.add("show");
+      input.value = "";
+      input.focus();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    try{
+      if(sessionStorage.getItem(GATE_SESSION_KEY) === "1"){
+        unlock();
+        return;
+      }
+    }catch(e){}
+    document.getElementById("gate-submit").addEventListener("click", tryUnlock);
+    document.getElementById("gate-input").addEventListener("keydown", function(e){
+      if(e.key === "Enter") tryUnlock();
+    });
+    document.getElementById("gate-input").focus();
+  });
+})();
+
 (function(){
   "use strict";
 
