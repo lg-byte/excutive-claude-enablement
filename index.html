@@ -174,8 +174,7 @@
   .measure-item-head{display:flex; align-items:center; gap:10px;}
   .measure-item-head label{font-weight:600; font-size:15px; cursor:pointer;}
   .measure-detail{margin-top:10px; padding-left:28px;}
-  .wave-row{display:grid; grid-template-columns:140px 1fr; gap:12px; align-items:center; margin-bottom:10px;}
-  .wave-row .wave-name{font-size:14px; font-weight:600; color:var(--text-secondary);}
+
   .computed-box{display:flex; align-items:center; gap:10px; background:#F5F5F5; border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px;}
   .computed-box .computed-value{font-size:20px; font-weight:700; color:var(--accent);}
   .computed-box .computed-label{font-size:13px; color:var(--text-secondary);}
@@ -289,6 +288,7 @@
         <p class="panel-intro">Anklicken zum Aktivieren/Deaktivieren. Jeder aktive Baustein rechnet pauschal 30 Minuten zur Gesamtdauer hinzu.</p>
       </div>
       <div id="optional-sessions"></div>
+      <div id="out-of-scope-section"></div>
     </section>
 
     <!-- Section 3 -->
@@ -299,10 +299,6 @@
       </div>
 
       <div class="field-group">
-        <div class="field">
-          <label class="field-label">Präsenz / Online / Hybrid<span class="hint-suggestion">Vorschlag, im Workshop anpassbar</span></label>
-          <div class="option-row" id="opt-mode" data-path="delivery.mode" data-options="praesenz:Präsenz,online:Online,hybrid:Hybrid"></div>
-        </div>
         <div class="field">
           <label class="field-label">Sprache</label>
           <div class="option-row" id="opt-language" data-path="delivery.language" data-options="de:Deutsch,en:Englisch,bilingual:Zweisprachig"></div>
@@ -353,7 +349,21 @@
         </div>
         <div class="field">
           <label class="field-label">Anzahl Wellen</label>
-          <div class="option-row" id="opt-waves" data-path="scheduling.waves" data-numeric="true" data-options="2:2,3:3,4:4"></div>
+          <input type="number" min="1" max="10" data-path="scheduling.waves" style="max-width:120px;">
+        </div>
+        <div class="field">
+          <label class="field-label">Verteilung Online / Präsenz<span class="hint-suggestion">Vorschlag, im Workshop anpassbar</span></label>
+          <div style="display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap;">
+            <div>
+              <label class="field-label" style="font-weight:500; font-size:13px;">Wellen online</label>
+              <input type="number" min="0" id="waves-online-input" style="max-width:120px;">
+            </div>
+            <div class="computed-box" style="margin-bottom:1px;">
+              <span class="computed-value" id="waves-praesenz-value">–</span>
+              <span class="computed-label">Wellen Präsenz</span>
+            </div>
+          </div>
+          <p class="hint">Summe aus Online- und Präsenz-Wellen ergibt automatisch die Gesamtzahl der Wellen.</p>
         </div>
         <div class="field">
           <label class="field-label">Executives pro Welle (automatisch berechnet)</label>
@@ -365,23 +375,47 @@
       </div>
 
       <div class="field-group">
-        <h3 style="margin-bottom:16px;">Terminplan-Vorschlag <span class="hint-suggestion">Vorschlag, im Workshop anpassbar</span></h3>
+        <h3 style="margin-bottom:6px;">Terminplan-Vorschlag <span class="hint-suggestion">Vorschlag, im Workshop anpassbar</span></h3>
+        <p class="hint" style="margin-bottom:18px;">Online-Wellen laufen über zwei Wochen (Dienstag &amp; Donnerstag, virtuell). Präsenz-Wellen laufen an zwei aufeinanderfolgenden Tagen mit je zwei Sessions pro Tag.</p>
+
+        <h4 style="font-size:14px; font-weight:700; color:var(--text-secondary); margin:0 0 10px;">Online-Wellen</h4>
         <div class="field">
           <label class="field-label">Woche 1</label>
-          <input type="text" data-path="scheduling.week1">
+          <input type="text" data-path="scheduling.online_week1">
         </div>
         <div class="field">
           <label class="field-label">Woche 2</label>
-          <input type="text" data-path="scheduling.week2">
+          <input type="text" data-path="scheduling.online_week2">
+        </div>
+
+        <h4 style="font-size:14px; font-weight:700; color:var(--text-secondary); margin:22px 0 10px;">Präsenz-Wellen</h4>
+        <div class="field">
+          <label class="field-label">Tag 1</label>
+          <input type="text" data-path="scheduling.praesenz_day1">
         </div>
         <div class="field">
-          <label class="field-label">Zeitversatz der Wellen am selben Tag</label>
-          <div id="wave-rows"></div>
-          <p class="hint">Wellen laufen zeitversetzt am selben Tag – Zuordnung frei editierbar. Anzahl der Zeilen passt sich automatisch an die gewählte Wellenanzahl an.</p>
+          <label class="field-label">Tag 2</label>
+          <input type="text" data-path="scheduling.praesenz_day2">
         </div>
+
         <div class="field">
           <label class="field-label">Abstand zwischen den Modulblöcken (Wochen)</label>
           <input type="text" data-path="scheduling.gap_weeks" style="max-width:200px;">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <h3 style="margin-bottom:6px;">Programmzeitraum</h3>
+        <p class="hint" style="margin-bottom:18px;">Zeitraum, in dem alle Wellen stattfinden.</p>
+        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+          <div class="field" style="flex:1; min-width:180px;">
+            <label class="field-label">Startdatum</label>
+            <input type="date" data-path="scheduling.start_date">
+          </div>
+          <div class="field" style="flex:1; min-width:180px;">
+            <label class="field-label">Abschlussdatum</label>
+            <input type="date" data-path="scheduling.end_date">
+          </div>
         </div>
       </div>
     </section>
@@ -561,6 +595,14 @@
     ]}
   };
 
+  var OUT_OF_SCOPE = {title:"Out of Scope", items:[
+    {key:"oos_agents", label:"Agenten"},
+    {key:"oos_claudecode", label:"Claude Code"},
+    {key:"oos_skills", label:"Skills"},
+    {key:"oos_mdfiles", label:"*.MD files"},
+    {key:"oos_mcp", label:"MCP Server"}
+  ]};
+
   var FOLLOWUP_MEASURES = [
     {key:"newsletter", label:"Newsletter (Feature-Updates & Best Practices)", hasCadence:true},
     {key:"knowledge_hub", label:"Knowledge Hub (weiterführende Infos, Anleitungen, FAQ)"},
@@ -571,7 +613,6 @@
   ];
 
   var LABELS = {
-    mode: {praesenz:"Präsenz", online:"Online", hybrid:"Hybrid"},
     language: {de:"Deutsch", en:"Englisch", bilingual:"Zweisprachig"},
     cadence: {woechentlich:"wöchentlich", alle2wochen:"alle 2 Wochen", monatlich:"monatlich"},
     form: {selbsteinschaetzung:"Kurze Selbsteinschätzung", nutzungsdaten:"Nutzungsdaten", beides:"Beides", weitere:"Weitere"},
@@ -585,18 +626,21 @@
         s1_projects:false, s1_hygiene:false, s1_custom:false, s1_promptdeep:false,
         s2_workflows:false, s2_localization:false, s2_hallucination:false, s2_research2pres:false,
         s3_excel:false, s3_ppt:false, s3_m365:false, s3_teamwork:false,
-        s4_euaiact:false, s4_compliance:false, s4_change:false, s4_roadmap:false
+        s4_euaiact:false, s4_compliance:false, s4_change:false, s4_roadmap:false,
+        oos_agents:false, oos_claudecode:false, oos_skills:false, oos_mdfiles:false, oos_mcp:false
       },
       delivery: {
-        mode:"hybrid", language:"de", tz_relevant:false, tz_regions:"",
+        language:"de", tz_relevant:false, tz_regions:"",
         qa_between:true, ongoing_support:false, ongoing_cadence:"monatlich"
       },
       scheduling: {
-        total_execs:100, waves:3,
-        week1:"Dienstag & Donnerstag, virtuell",
-        week2:"Dienstag & Donnerstag, in Präsenz",
-        wave_slots:["vormittags","mittags","nachmittags"],
-        gap_weeks:"1–2"
+        total_execs:100, waves:3, waves_online:1,
+        online_week1:"Dienstag & Donnerstag, virtuell",
+        online_week2:"Dienstag & Donnerstag, virtuell",
+        praesenz_day1:"2 Sessions (vormittags & nachmittags), in Präsenz",
+        praesenz_day2:"2 Sessions (vormittags & nachmittags), in Präsenz",
+        gap_weeks:"1–2",
+        start_date:"", end_date:""
       },
       success: { baseline:true, followup_30:true, followup_60:true, followup_90:true, form:"beides", form_other:"" },
       comms: { prep_email:true, prep_email_adjust:false, prep_email_notes:"", sponsor:"clevel" },
@@ -712,7 +756,22 @@
       html += "</div></div>";
     });
     container.innerHTML = html;
+    bindOptionalCards(container);
 
+    var oosContainer = document.getElementById("out-of-scope-section");
+    var oosHtml = '<div class="session-block"><h3>'+escapeHtml(OUT_OF_SCOPE.title)+"</h3>";
+    oosHtml += '<div class="card-grid">';
+    OUT_OF_SCOPE.items.forEach(function(item){
+      oosHtml += '<div class="card" data-optional-key="'+item.key+'">'+
+                '<span class="checkmark"></span>'+
+                '<span class="card-text">'+escapeHtml(item.label)+'<span class="card-meta">+30 Min.</span></span>'+
+              '</div>';
+    });
+    oosHtml += "</div></div>";
+    oosContainer.innerHTML = oosHtml;
+    bindOptionalCards(oosContainer);
+  }
+  function bindOptionalCards(container){
     container.querySelectorAll(".card").forEach(function(card){
       card.addEventListener("click", function(){
         var key = card.dataset.optionalKey;
@@ -750,7 +809,6 @@
           syncOptionRow(row);
           updateConditionals();
           updateMetrics();
-          if(path === "scheduling.waves") renderWaveRows();
           renderSummary();
           scheduleSave();
         });
@@ -768,38 +826,40 @@
     document.querySelectorAll(".option-row[data-options]").forEach(syncOptionRow);
   }
 
-  /* ---------- Wave rows (Section 4) ---------- */
-  var DEFAULT_SLOTS = {
-    2:["vormittags","nachmittags"],
-    3:["vormittags","mittags","nachmittags"],
-    4:["vormittags","mittags","nachmittags","spätnachmittags"]
-  };
-  function renderWaveRows(){
+  /* ---------- Wave count clamping (Section 4) ---------- */
+  function clampWaves(){
     var waves = Number(state.scheduling.waves) || 3;
-    var slots = state.scheduling.wave_slots || [];
-    var defaults = DEFAULT_SLOTS[waves] || DEFAULT_SLOTS[3];
-    var newSlots = [];
-    for(var i=0;i<waves;i++){
-      newSlots.push(slots[i] !== undefined ? slots[i] : defaults[i]);
-    }
-    state.scheduling.wave_slots = newSlots;
+    if(waves < 1) waves = 1;
+    if(waves > 10) waves = 10;
+    state.scheduling.waves = waves;
+  }
 
-    var container = document.getElementById("wave-rows");
-    container.innerHTML = newSlots.map(function(val, i){
-      return '<div class="wave-row"><span class="wave-name">Welle '+(i+1)+'</span>'+
-        '<input type="text" data-wave-index="'+i+'" value="'+escapeHtml(val)+'"></div>';
-    }).join("");
-    container.querySelectorAll("input[data-wave-index]").forEach(function(input){
-      input.addEventListener("input", function(){
-        var idx = Number(input.dataset.waveIndex);
-        state.scheduling.wave_slots[idx] = input.value;
-        renderSummary();
-        scheduleSave();
-      });
+  /* ---------- Online/Präsenz-Verteilung der Wellen (Section 4) ---------- */
+  function updateWavesSplit(){
+    var total = Number(state.scheduling.waves) || 1;
+    var online = Number(state.scheduling.waves_online);
+    if(isNaN(online) || online < 0) online = 0;
+    if(online > total) online = total;
+    state.scheduling.waves_online = online;
+    var praesenz = total - online;
+    var onlineInput = document.getElementById("waves-online-input");
+    if(onlineInput){ onlineInput.value = online; onlineInput.setAttribute("max", String(total)); }
+    var praesenzEl = document.getElementById("waves-praesenz-value");
+    if(praesenzEl) praesenzEl.textContent = String(praesenz);
+  }
+  function bindWavesOnlineInput(){
+    var input = document.getElementById("waves-online-input");
+    if(!input) return;
+    input.setAttribute("max", String(Number(state.scheduling.waves) || 10));
+    input.addEventListener("input", function(){
+      state.scheduling.waves_online = Number(input.value);
+      updateWavesSplit();
+      renderSummary();
+      scheduleSave();
     });
   }
 
-  /* ---------- Follow-up measures (Section 7) ---------- */
+
   function renderFollowupMeasures(){
     var container = document.getElementById("followup-measures");
     container.innerHTML = FOLLOWUP_MEASURES.map(function(m){
@@ -840,6 +900,7 @@
     setPath(state, path, value);
     updateConditionals();
     syncMeasureHighlight();
+    if(path === "scheduling.waves"){ clampWaves(); el.value = state.scheduling.waves; updateWavesSplit(); }
     updateMetrics();
     renderSummary();
     scheduleSave();
@@ -908,11 +969,16 @@
         ? '<ul class="summary-list">'+active.map(function(it){ return '<li><span class="k">'+escapeHtml(it.label)+'</span><span class="v">aktiv · +30 Min.</span></li>'; }).join("")+"</ul>"
         : '<p class="summary-empty">Keine optionalen Bausteine ausgewählt.</p>';
       return '<div class="summary-section"><h3>'+escapeHtml(group.title)+"</h3>"+body+"</div>";
-    }).join("");
+    }).join("") + (function(){
+      var activeOos = OUT_OF_SCOPE.items.filter(function(it){ return state.optional[it.key]; });
+      var body = activeOos.length
+        ? '<ul class="summary-list">'+activeOos.map(function(it){ return '<li><span class="k">'+escapeHtml(it.label)+'</span><span class="v">aktiv · +30 Min.</span></li>'; }).join("")+"</ul>"
+        : '<p class="summary-empty">Keine Out-of-Scope-Themen ausgewählt.</p>';
+      return '<div class="summary-section"><h3>'+escapeHtml(OUT_OF_SCOPE.title)+"</h3>"+body+"</div>";
+    })();
 
     var d = state.delivery;
     var deliveryHtml = summaryList([
-      ["Format", LABELS.mode[d.mode] || d.mode],
       ["Sprache", LABELS.language[d.language] || d.language],
       ["Zeitzonen-Relevanz", d.tz_relevant ? ("Ja – "+(d.tz_regions || "(keine Regionen angegeben)")) : "Nein"],
       ["Q&A zwischen den Modulen", d.qa_between ? "Ja" : "Nein"],
@@ -920,15 +986,18 @@
     ]);
 
     var sch = state.scheduling;
-    var waveRowsText = (sch.wave_slots||[]).map(function(v,i){ return "Welle "+(i+1)+": "+v; }).join(" · ");
+    var programZeitraum = (sch.start_date || "(kein Startdatum)")+" – "+(sch.end_date || "(kein Abschlussdatum)");
     var schedulingHtml = summaryList([
       ["Anzahl Executives gesamt", String(sch.total_execs)],
       ["Anzahl Wellen", String(sch.waves)],
+      ["Verteilung Online / Präsenz", sch.waves_online+" online / "+(sch.waves - sch.waves_online)+" Präsenz"],
       ["Executives pro Welle", String(execsPerWave())],
-      ["Woche 1", sch.week1],
-      ["Woche 2", sch.week2],
-      ["Zeitversatz der Wellen", waveRowsText],
-      ["Abstand zwischen Modulblöcken", sch.gap_weeks+" Wochen"]
+      ["Online-Wellen – Woche 1", sch.online_week1],
+      ["Online-Wellen – Woche 2", sch.online_week2],
+      ["Präsenz-Wellen – Tag 1", sch.praesenz_day1],
+      ["Präsenz-Wellen – Tag 2", sch.praesenz_day2],
+      ["Abstand zwischen Modulblöcken", sch.gap_weeks+" Wochen"],
+      ["Programmzeitraum", programZeitraum]
     ]);
 
     var suc = state.success;
@@ -984,6 +1053,9 @@
         return { label: it.label, aktiv: !!state.optional[it.key] };
       });
     });
+    activeOptional["Out_of_Scope"] = OUT_OF_SCOPE.items.map(function(it){
+      return { label: it.label, aktiv: !!state.optional[it.key] };
+    });
 
     var d = state.delivery;
     var sch = state.scheduling;
@@ -997,7 +1069,6 @@
       }),
       "2_Optionale_Bausteine": activeOptional,
       "3_Delivery_Format": {
-        format: LABELS.mode[d.mode] || d.mode,
         sprache: LABELS.language[d.language] || d.language,
         zeitzonen_relevanz: d.tz_relevant,
         zeitzonen_regionen: d.tz_relevant ? d.tz_regions : null,
@@ -1008,11 +1079,16 @@
       "4_Terminierung_Wellen": {
         executives_gesamt: sch.total_execs,
         anzahl_wellen: sch.waves,
+        wellen_online: sch.waves_online,
+        wellen_praesenz: sch.waves - sch.waves_online,
         executives_pro_welle: execsPerWave(),
-        woche_1: sch.week1,
-        woche_2: sch.week2,
-        zeitversatz_wellen: (sch.wave_slots||[]).map(function(v,i){ return { welle:i+1, zeitfenster:v }; }),
-        abstand_modulbloecke_wochen: sch.gap_weeks
+        woche_1_online: sch.online_week1,
+        woche_2_online: sch.online_week2,
+        tag_1_praesenz: sch.praesenz_day1,
+        tag_2_praesenz: sch.praesenz_day2,
+        abstand_modulbloecke_wochen: sch.gap_weeks,
+        programm_startdatum: sch.start_date || null,
+        programm_abschlussdatum: sch.end_date || null
       },
       "5_Erfolgsmessung": {
         baseline_erhebung: suc.baseline,
@@ -1068,10 +1144,11 @@
     renderCoreTable();
     renderOptionalSessions();
     renderOptionRows();
-    renderWaveRows();
+    clampWaves();
     renderFollowupMeasures();
 
     bindAllInputs();
+    bindWavesOnlineInput();
     bindNav();
     bindReset();
 
@@ -1080,6 +1157,7 @@
     syncOptionalCards();
     updateConditionals();
     syncMeasureHighlight();
+    updateWavesSplit();
     updateMetrics();
     renderSummary();
 
